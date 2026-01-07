@@ -61,10 +61,13 @@ export function PerformanceChart({ data, title }: PerformanceChartProps) {
                 border: "1px solid rgba(0, 255, 136, 0.3)",
                 borderRadius: "4px",
               }}
-              formatter={(value: number, name: string, props: { payload: PerformanceData }) => [
-                `${formatPercent(value)} (${formatCurrency(props.payload.marketValue)})`,
-                props.payload.holding,
-              ]}
+              formatter={(value, _name, props) => {
+                const payload = props.payload as PerformanceData;
+                return [
+                  `${formatPercent(value as number)} (${formatCurrency(payload.marketValue)})`,
+                  payload.holding,
+                ];
+              }}
               labelFormatter={(label) => `Symbol: ${label}`}
             />
             <ReferenceLine x={0} stroke="#6b7280" strokeDasharray="3 3" />

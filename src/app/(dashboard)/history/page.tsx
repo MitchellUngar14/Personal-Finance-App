@@ -71,7 +71,7 @@ export default function HistoryPage() {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl text-terminal-green">
+        <h1 className="text-xl sm:text-2xl text-terminal-green">
           <span className="text-terminal-cyan">$</span> history
         </h1>
         <div className="terminal-window p-12">
@@ -86,7 +86,7 @@ export default function HistoryPage() {
   if (error) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl text-terminal-green">
+        <h1 className="text-xl sm:text-2xl text-terminal-green">
           <span className="text-terminal-cyan">$</span> history
         </h1>
         <Terminal title="error">

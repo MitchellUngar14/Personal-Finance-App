@@ -9,8 +9,8 @@ export default auth((req) => {
   const publicRoutes = ["/login", "/register"];
   const isPublicRoute = publicRoutes.some((route) => pathname.startsWith(route));
 
-  // API routes for auth are always accessible
-  const isAuthApi = pathname.startsWith("/api/auth");
+  // API routes for auth and registration are always accessible
+  const isAuthApi = pathname.startsWith("/api/auth") || pathname === "/api/register";
 
   // Allow public routes and auth API
   if (isPublicRoute || isAuthApi) {

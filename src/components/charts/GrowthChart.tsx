@@ -59,8 +59,8 @@ export function GrowthChart({ data }: GrowthChartProps) {
               borderRadius: "4px",
             }}
             labelStyle={{ color: "#00d4ff" }}
-            formatter={(value: number, name: string) => [
-              formatCurrency(value),
+            formatter={(value, name) => [
+              formatCurrency(value as number),
               name === "totalValue"
                 ? "Market Value"
                 : name === "bookValue"

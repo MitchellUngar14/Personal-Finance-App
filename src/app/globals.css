@@ -310,3 +310,57 @@ input::placeholder, textarea::placeholder {
 .dropdown-item:hover {
   background: rgba(0, 255, 136, 0.1);
 }
+
+/* Mobile-specific styles */
+@media (max-width: 640px) {
+  /* Smaller padding on mobile */
+  .stat-card {
+    padding: 1rem;
+  }
+
+  /* Smaller table text on mobile */
+  .data-table th,
+  .data-table td {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+  }
+
+  /* Button adjustments for mobile */
+  .btn-terminal {
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  /* Terminal window adjustments */
+  .terminal-header {
+    padding: 0.5rem 0.75rem;
+  }
+
+  /* Chart container mobile adjustments */
+  .chart-container {
+    padding: 1rem;
+  }
+}
+
+/* Touch-friendly tap targets */
+@media (pointer: coarse) {
+  button, a, input, select {
+    min-height: 44px;
+  }
+
+  .data-table td, .data-table th {
+    min-height: 44px;
+  }
+}
+
+/* Prevent horizontal scroll on mobile */
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Safe area insets for notched devices */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .mobile-safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}

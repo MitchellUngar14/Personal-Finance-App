@@ -51,8 +51,8 @@ export function AllocationChart({ data }: AllocationChartProps) {
             paddingAngle={2}
             dataKey="value"
             nameKey="category"
-            label={({ category, percentage }) =>
-              percentage > 5 ? `${category}: ${percentage.toFixed(1)}%` : ""
+            label={({ name, percent }) =>
+              percent && percent > 0.05 ? `${name}: ${(percent * 100).toFixed(1)}%` : ""
             }
             labelLine={{ stroke: "#6b7280", strokeWidth: 1 }}
           >
@@ -71,9 +71,9 @@ export function AllocationChart({ data }: AllocationChartProps) {
               border: "1px solid rgba(0, 255, 136, 0.3)",
               borderRadius: "4px",
             }}
-            formatter={(value: number, name: string) => [
-              formatCurrency(value),
-              name,
+            formatter={(value) => [
+              formatCurrency(value as number),
+              "Value",
             ]}
           />
           <Legend

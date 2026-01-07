@@ -31,8 +31,8 @@ export function StatCard({
           </span>
         )}
       </div>
-      <div className="mt-3">
-        <div className="text-2xl font-semibold text-terminal-green tabular-nums">
+      <div className="mt-2 sm:mt-3">
+        <div className="text-xl sm:text-2xl font-semibold text-terminal-green tabular-nums">
           {value}
         </div>
         {subValue && (

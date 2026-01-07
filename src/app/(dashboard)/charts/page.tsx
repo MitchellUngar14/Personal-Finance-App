@@ -79,7 +79,7 @@ export default function ChartsPage() {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl text-terminal-green">
+          <h1 className="text-xl sm:text-2xl text-terminal-green">
             <span className="text-terminal-cyan">$</span> analytics
           </h1>
         </div>
@@ -95,7 +95,7 @@ export default function ChartsPage() {
   if (error) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl text-terminal-green">
+        <h1 className="text-xl sm:text-2xl text-terminal-green">
           <span className="text-terminal-cyan">$</span> analytics
         </h1>
         <Terminal title="error">
@@ -110,7 +110,7 @@ export default function ChartsPage() {
   if (growthData.length === 0 && !analyticsData?.summary) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl text-terminal-green">
+        <h1 className="text-xl sm:text-2xl text-terminal-green">
           <span className="text-terminal-cyan">$</span> analytics
         </h1>
         <Terminal title="charts">
@@ -132,10 +132,10 @@ export default function ChartsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl text-terminal-green">
+          <h1 className="text-xl sm:text-2xl text-terminal-green">
             <span className="text-terminal-cyan">$</span> analytics
           </h1>
-          <p className="text-text-muted text-sm mt-1">
+          <p className="text-text-muted text-xs sm:text-sm mt-1">
             Portfolio performance and allocation analysis
           </p>
         </div>

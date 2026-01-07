@@ -51,18 +51,18 @@ async function DashboardContent() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl text-terminal-green">
+          <h1 className="text-xl sm:text-2xl text-terminal-green">
             <span className="text-terminal-cyan">$</span> portfolio_status
           </h1>
-          <p className="text-text-muted text-sm mt-1">
+          <p className="text-text-muted text-xs sm:text-sm mt-1">
             Snapshot: {latestSnapshot.snapshotDate?.toLocaleDateString()}
           </p>
         </div>
         <Link
           href="/import"
-          className="btn-terminal text-sm"
+          className="btn-terminal text-xs sm:text-sm self-start sm:self-auto"
         >
           [+ IMPORT]
         </Link>

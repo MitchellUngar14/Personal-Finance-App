@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { desc, eq, sql } from "drizzle-orm";
+import { desc, eq, sql, asc } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { snapshots, holdings, portfolioMetrics } from "@/lib/schema";
 import { getCurrentUser } from "@/lib/auth";
@@ -53,19 +53,19 @@ export async function GET(request: NextRequest) {
       .orderBy(desc(holdings.gainLossPercent))
       .limit(5);
 
-    // Get bottom performers
+    // Get bottom performers (ascending order for worst performers)
     const bottomPerformers = await db
       .select()
       .from(holdings)
       .where(eq(holdings.snapshotId, targetSnapshot.id))
-      .orderBy(holdings.gainLossPercent)
+      .orderBy(asc(holdings.gainLossPercent))
       .limit(5);
 
     // Get allocation by asset category
     const allocation = await db
       .select({
         category: holdings.assetCategory,
-        totalValue: sql<number>`sum(${holdings.marketValue})`.as("total_value"),
+        totalValue: sql<string>`COALESCE(sum(${holdings.marketValue}), 0)`.as("total_value"),
       })
       .from(holdings)
       .where(eq(holdings.snapshotId, targetSnapshot.id))
@@ -101,7 +101,7 @@ export async function GET(request: NextRequest) {
       })),
       allocation: allocation.map((a) => ({
         category: a.category || "Unknown",
-        value: a.totalValue || 0,
+        value: parseFloat(a.totalValue) || 0,
       })),
     });
   } catch (error) {
