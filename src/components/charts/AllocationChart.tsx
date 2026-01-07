@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
   PieChart,
   Pie,
@@ -31,6 +32,15 @@ const COLORS = [
 ];
 
 export function AllocationChart({ data }: AllocationChartProps) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   const total = data.reduce((sum, item) => sum + item.value, 0);
 
   const chartData = data.map((item) => ({
@@ -39,22 +49,22 @@ export function AllocationChart({ data }: AllocationChartProps) {
   }));
 
   return (
-    <div className="h-[400px] w-full">
+    <div className={isMobile ? "h-[550px] w-full" : "h-[400px] w-full"}>
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
             data={chartData}
             cx="50%"
-            cy="50%"
-            innerRadius={80}
-            outerRadius={140}
+            cy={isMobile ? "40%" : "50%"}
+            innerRadius={isMobile ? 100 : 80}
+            outerRadius={isMobile ? 180 : 140}
             paddingAngle={2}
             dataKey="value"
             nameKey="category"
-            label={({ name, percent }) =>
+            label={isMobile ? false : ({ name, percent }) =>
               percent && percent > 0.05 ? `${name}: ${(percent * 100).toFixed(1)}%` : ""
             }
-            labelLine={{ stroke: "#6b7280", strokeWidth: 1 }}
+            labelLine={isMobile ? false : { stroke: "#6b7280", strokeWidth: 1 }}
           >
             {chartData.map((entry, index) => (
               <Cell
@@ -70,21 +80,27 @@ export function AllocationChart({ data }: AllocationChartProps) {
               backgroundColor: "#0f0f14",
               border: "1px solid rgba(0, 255, 136, 0.3)",
               borderRadius: "4px",
+              color: "#e0e0e0",
             }}
-            formatter={(value) => [
-              formatCurrency(value as number),
-              "Value",
-            ]}
+            labelStyle={{ color: "#00d4ff", fontWeight: "bold", marginBottom: "4px" }}
+            itemStyle={{ color: "#00ff88" }}
+            formatter={(value, name, props) => {
+              const item = chartData.find(d => d.category === props.payload.category);
+              return [
+                `${formatCurrency(value as number)} (${item?.percentage.toFixed(1)}%)`,
+                props.payload.category,
+              ];
+            }}
           />
           <Legend
-            layout="vertical"
-            align="right"
-            verticalAlign="middle"
-            wrapperStyle={{ paddingLeft: "20px" }}
+            layout={isMobile ? "horizontal" : "vertical"}
+            align={isMobile ? "center" : "right"}
+            verticalAlign={isMobile ? "bottom" : "middle"}
+            wrapperStyle={isMobile ? { paddingTop: "20px" } : { paddingLeft: "20px" }}
             formatter={(value) => {
               const item = chartData.find((d) => d.category === value);
               return (
-                <span className="text-text-secondary text-sm">
+                <span className="text-text-secondary text-xs sm:text-sm">
                   {value} ({item?.percentage.toFixed(1)}%)
                 </span>
               );

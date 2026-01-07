@@ -17,17 +17,30 @@ interface DataPoint {
   totalValue: number;
   bookValue: number;
   gainLoss: number;
+  externalAssets?: number;
+  combinedValue?: number;
 }
 
 interface GrowthChartProps {
   data: DataPoint[];
 }
 
+const LINE_NAMES: Record<string, string> = {
+  totalValue: "RJ Portfolio",
+  bookValue: "Book Value",
+  gainLoss: "Gain/Loss",
+  externalAssets: "External Assets",
+  combinedValue: "Total Net Worth",
+};
+
 export function GrowthChart({ data }: GrowthChartProps) {
   const formattedData = data.map((point) => ({
     ...point,
     dateLabel: formatDate(point.date),
   }));
+
+  // Check if we have external assets data
+  const hasExternalAssets = data.some((point) => (point.externalAssets || 0) > 0);
 
   return (
     <div className="h-[400px] w-full">
@@ -57,27 +70,31 @@ export function GrowthChart({ data }: GrowthChartProps) {
               backgroundColor: "#0f0f14",
               border: "1px solid rgba(0, 255, 136, 0.3)",
               borderRadius: "4px",
+              color: "#e0e0e0",
             }}
             labelStyle={{ color: "#00d4ff" }}
+            itemStyle={{ color: "#00ff88" }}
             formatter={(value, name) => [
               formatCurrency(value as number),
-              name === "totalValue"
-                ? "Market Value"
-                : name === "bookValue"
-                ? "Book Value"
-                : "Gain/Loss",
+              LINE_NAMES[name as string] || name,
             ]}
+            itemSorter={(item) => -(item.value as number)}
           />
           <Legend
             wrapperStyle={{ paddingTop: "20px" }}
-            formatter={(value) =>
-              value === "totalValue"
-                ? "Market Value"
-                : value === "bookValue"
-                ? "Book Value"
-                : "Gain/Loss"
-            }
+            formatter={(value) => LINE_NAMES[value] || value}
           />
+          {/* Combined Value (Total Net Worth) - only show if we have external assets */}
+          {hasExternalAssets && (
+            <Line
+              type="monotone"
+              dataKey="combinedValue"
+              stroke="#ffcc00"
+              strokeWidth={3}
+              dot={{ fill: "#ffcc00", strokeWidth: 0, r: 4 }}
+              activeDot={{ r: 6, fill: "#ffcc00" }}
+            />
+          )}
           <Line
             type="monotone"
             dataKey="totalValue"
@@ -94,6 +111,18 @@ export function GrowthChart({ data }: GrowthChartProps) {
             dot={{ fill: "#00d4ff", strokeWidth: 0, r: 4 }}
             activeDot={{ r: 6, fill: "#00d4ff" }}
           />
+          {/* External Assets - only show if we have data */}
+          {hasExternalAssets && (
+            <Line
+              type="monotone"
+              dataKey="externalAssets"
+              stroke="#ff0080"
+              strokeWidth={2}
+              strokeDasharray="5 5"
+              dot={{ fill: "#ff0080", strokeWidth: 0, r: 4 }}
+              activeDot={{ r: 6, fill: "#ff0080" }}
+            />
+          )}
         </LineChart>
       </ResponsiveContainer>
     </div>

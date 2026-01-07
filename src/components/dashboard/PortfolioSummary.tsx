@@ -23,24 +23,28 @@ export function PortfolioSummary({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <StatCard
+        index={0}
         label="Total Value"
         value={formatCurrency(totalMarketValue)}
         subValue={`Book: ${formatCurrency(totalBookValue)}`}
         icon="$"
       />
       <StatCard
+        index={1}
         label="Total Gain/Loss"
         value={formatCurrency(totalGainLoss)}
         trend={totalGainLossPercent}
         icon={totalGainLoss && totalGainLoss >= 0 ? "^" : "v"}
       />
       <StatCard
+        index={2}
         label="Holdings"
         value={holdingsCount?.toString() || "0"}
         subValue="Active positions"
         icon="#"
       />
       <StatCard
+        index={3}
         label="Accounts"
         value={accountsCount?.toString() || "0"}
         subValue="Tracked accounts"
@@ -54,10 +58,10 @@ export function PortfolioSummary({
 export function PortfolioSummaryEmpty() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <StatCard label="Total Value" value="$0.00" icon="$" />
-      <StatCard label="Total Gain/Loss" value="$0.00" icon="~" />
-      <StatCard label="Holdings" value="0" subValue="No data imported" icon="#" />
-      <StatCard label="Accounts" value="0" subValue="Import CSV to begin" icon="@" />
+      <StatCard index={0} label="Total Value" value="$0.00" icon="$" />
+      <StatCard index={1} label="Total Gain/Loss" value="$0.00" icon="~" />
+      <StatCard index={2} label="Holdings" value="0" subValue="No data imported" icon="#" />
+      <StatCard index={3} label="Accounts" value="0" subValue="Import CSV to begin" icon="@" />
     </div>
   );
 }

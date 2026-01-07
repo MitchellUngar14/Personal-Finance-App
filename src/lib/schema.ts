@@ -92,6 +92,30 @@ export const auditLog = pgTable("audit_log", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 
+// External accounts from other banks/institutions
+export const externalAccounts = pgTable("external_accounts", {
+  id: serial("id").primaryKey(),
+  userId: uuid("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+  bankName: varchar("bank_name", { length: 255 }).notNull(),
+  accountName: varchar("account_name", { length: 255 }).notNull(),
+  accountType: varchar("account_type", { length: 100 }), // e.g., "Chequing", "Savings", "Mortgage", "Investment"
+  isActive: integer("is_active").default(1), // Soft delete
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+// External account value entries - blockchain style immutable history
+export const externalAccountEntries = pgTable("external_account_entries", {
+  id: serial("id").primaryKey(),
+  accountId: integer("account_id")
+    .references(() => externalAccounts.id, { onDelete: "cascade" })
+    .notNull(),
+  value: decimal("value", { precision: 18, scale: 2 }).notNull(),
+  note: varchar("note", { length: 500 }), // Optional note for the entry
+  recordedAt: timestamp("recorded_at", { withTimezone: true }).defaultNow(),
+});
+
 // Type exports for use in application
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -102,3 +126,7 @@ export type Holding = typeof holdings.$inferSelect;
 export type NewHolding = typeof holdings.$inferInsert;
 export type PortfolioMetrics = typeof portfolioMetrics.$inferSelect;
 export type AuditLog = typeof auditLog.$inferSelect;
+export type ExternalAccount = typeof externalAccounts.$inferSelect;
+export type NewExternalAccount = typeof externalAccounts.$inferInsert;
+export type ExternalAccountEntry = typeof externalAccountEntries.$inferSelect;
+export type NewExternalAccountEntry = typeof externalAccountEntries.$inferInsert;

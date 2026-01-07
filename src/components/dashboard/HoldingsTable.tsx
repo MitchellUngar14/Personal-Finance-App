@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { formatCurrency, formatPercent, getValueClass, cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Holding {
   id: number;
@@ -56,7 +57,7 @@ function SortHeader({
     <th
       onClick={() => onSort(sortKeyName)}
       className={cn(
-        "cursor-pointer hover:text-terminal-green transition-colors",
+        "cursor-pointer hover:text-terminal-green transition-colors py-3",
         className
       )}
     >
@@ -109,16 +110,17 @@ export function HoldingsTable({ holdings, totals }: HoldingsTableProps) {
       : 0;
 
   return (
-    <div className="overflow-x-auto">
-      <table className="data-table text-xs sm:text-sm">
+    <div className="overflow-x-auto -mx-4 sm:mx-0">
+      <table className="data-table text-[10px] sm:text-sm">
         <thead>
           <tr>
             <SortHeader
-              label="Symbol"
+              label="Sym"
               sortKeyName="symbol"
               currentSortKey={sortKey}
               sortDirection={sortDirection}
               onSort={handleSort}
+              className="pl-4 sm:pl-6 col-symbol"
             />
             <SortHeader
               label="Holding"
@@ -158,49 +160,62 @@ export function HoldingsTable({ holdings, totals }: HoldingsTableProps) {
               currentSortKey={sortKey}
               sortDirection={sortDirection}
               onSort={handleSort}
-              className="text-right"
+              className="text-right pr-4 sm:pr-6"
             />
           </tr>
         </thead>
         <tbody>
-          {sortedHoldings.map((holding) => (
-            <tr key={holding.id} className="data-row">
-              <td className="text-terminal-cyan font-medium">
-                {holding.symbol || "-"}
-              </td>
-              <td className="hidden sm:table-cell max-w-[200px] truncate" title={holding.holding || ""}>
-                {holding.holding || "-"}
-              </td>
-              <td className="hidden md:table-cell text-text-secondary">
-                {holding.accountNickname || "-"}
-              </td>
-              <td className="text-right tabular-nums">
-                {formatCurrency(holding.marketValue)}
-              </td>
-              <td className={cn("hidden sm:table-cell text-right tabular-nums", getValueClass(holding.gainLoss))}>
-                {formatCurrency(holding.gainLoss)}
-              </td>
-              <td className={cn("text-right tabular-nums", getValueClass(holding.gainLossPercent))}>
-                {formatPercent(holding.gainLossPercent)}
-              </td>
-            </tr>
-          ))}
+          <AnimatePresence mode="popLayout">
+            {sortedHoldings.map((holding, index) => (
+              <motion.tr
+                key={holding.id}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.2, delay: Math.min(index * 0.05, 1) }}
+                className="data-row group"
+              >
+                <td className="pl-4 sm:pl-6 text-terminal-cyan font-medium py-3">
+                  <div className="flex flex-col">
+                    <span className="truncate max-w-[60px] sm:max-w-none">{holding.symbol || "-"}</span>
+                    <span className="sm:hidden text-[8px] text-text-muted truncate max-w-[60px]">
+                      {holding.holding}
+                    </span>
+                  </div>
+                </td>
+                <td className="hidden sm:table-cell max-w-[150px] lg:max-w-[300px] truncate py-3" title={holding.holding || ""}>
+                  {holding.holding || "-"}
+                </td>
+                <td className="hidden md:table-cell text-text-secondary py-3">
+                  {holding.accountNickname || "-"}
+                </td>
+                <td className="text-right tabular-nums py-3">
+                  {formatCurrency(holding.marketValue)}
+                </td>
+                <td className={cn("hidden sm:table-cell text-right tabular-nums py-3", getValueClass(holding.gainLoss))}>
+                  {formatCurrency(holding.gainLoss)}
+                </td>
+                <td className={cn("text-right tabular-nums pr-4 sm:pr-6 py-3", getValueClass(holding.gainLossPercent))}>
+                  {formatPercent(holding.gainLossPercent)}
+                </td>
+              </motion.tr>
+            ))}
+          </AnimatePresence>
         </tbody>
         <tfoot>
-          <tr className="border-t-2 border-terminal-green/30 font-medium">
-            <td className="text-terminal-cyan">
+          <tr className="border-t-2 border-terminal-green/30 font-medium bg-terminal-bg-light/30">
+            <td className="pl-4 sm:pl-6 py-4 text-terminal-cyan">
               <span className="hidden sm:inline">TOTAL ({holdings.length} positions)</span>
               <span className="sm:hidden">{holdings.length} pos</span>
             </td>
-            <td className="hidden sm:table-cell"></td>
-            <td className="hidden md:table-cell"></td>
-            <td className="text-right tabular-nums text-terminal-green">
+            <td className="hidden sm:table-cell py-4"></td>
+            <td className="hidden md:table-cell py-4"></td>
+            <td className="text-right tabular-nums text-terminal-green py-4 font-bold">
               {formatCurrency(totals.marketValue)}
             </td>
-            <td className={cn("hidden sm:table-cell text-right tabular-nums", getValueClass(totals.gainLoss))}>
+            <td className={cn("hidden sm:table-cell text-right tabular-nums py-4", getValueClass(totals.gainLoss))}>
               {formatCurrency(totals.gainLoss)}
             </td>
-            <td className={cn("text-right tabular-nums", getValueClass(totalGainLossPercent))}>
+            <td className={cn("text-right tabular-nums pr-4 sm:pr-6 py-4", getValueClass(totalGainLossPercent))}>
               {formatPercent(totalGainLossPercent)}
             </td>
           </tr>

@@ -45,20 +45,34 @@ export async function GET(request: NextRequest) {
       where: eq(portfolioMetrics.snapshotId, targetSnapshot.id),
     });
 
-    // Get top performers
+    // Get top performers (aggregated by symbol across all accounts)
     const topPerformers = await db
-      .select()
+      .select({
+        symbol: holdings.symbol,
+        holding: holdings.holding,
+        totalMarketValue: sql<string>`sum(${holdings.marketValue})`.as("total_market_value"),
+        totalBookValue: sql<string>`sum(${holdings.bookValue})`.as("total_book_value"),
+        totalGainLoss: sql<string>`sum(${holdings.gainLoss})`.as("total_gain_loss"),
+      })
       .from(holdings)
       .where(eq(holdings.snapshotId, targetSnapshot.id))
-      .orderBy(desc(holdings.gainLossPercent))
+      .groupBy(holdings.symbol, holdings.holding)
+      .orderBy(sql`sum(${holdings.gainLoss}) / NULLIF(sum(${holdings.bookValue}), 0) DESC`)
       .limit(5);
 
-    // Get bottom performers (ascending order for worst performers)
+    // Get bottom performers (aggregated by symbol across all accounts)
     const bottomPerformers = await db
-      .select()
+      .select({
+        symbol: holdings.symbol,
+        holding: holdings.holding,
+        totalMarketValue: sql<string>`sum(${holdings.marketValue})`.as("total_market_value"),
+        totalBookValue: sql<string>`sum(${holdings.bookValue})`.as("total_book_value"),
+        totalGainLoss: sql<string>`sum(${holdings.gainLoss})`.as("total_gain_loss"),
+      })
       .from(holdings)
       .where(eq(holdings.snapshotId, targetSnapshot.id))
-      .orderBy(asc(holdings.gainLossPercent))
+      .groupBy(holdings.symbol, holdings.holding)
+      .orderBy(sql`sum(${holdings.gainLoss}) / NULLIF(sum(${holdings.bookValue}), 0) ASC`)
       .limit(5);
 
     // Get allocation by asset category
@@ -87,18 +101,28 @@ export async function GET(request: NextRequest) {
             accountsCount: metrics.accountsCount,
           }
         : null,
-      topPerformers: topPerformers.map((h) => ({
-        symbol: h.symbol,
-        holding: h.holding,
-        gainLossPercent: parseFloat(h.gainLossPercent || "0"),
-        marketValue: parseFloat(h.marketValue || "0"),
-      })),
-      bottomPerformers: bottomPerformers.map((h) => ({
-        symbol: h.symbol,
-        holding: h.holding,
-        gainLossPercent: parseFloat(h.gainLossPercent || "0"),
-        marketValue: parseFloat(h.marketValue || "0"),
-      })),
+      topPerformers: topPerformers.map((h) => {
+        const bookValue = parseFloat(h.totalBookValue || "0");
+        const gainLoss = parseFloat(h.totalGainLoss || "0");
+        const gainLossPercent = bookValue !== 0 ? (gainLoss / bookValue) * 100 : 0;
+        return {
+          symbol: h.symbol,
+          holding: h.holding,
+          gainLossPercent,
+          marketValue: parseFloat(h.totalMarketValue || "0"),
+        };
+      }),
+      bottomPerformers: bottomPerformers.map((h) => {
+        const bookValue = parseFloat(h.totalBookValue || "0");
+        const gainLoss = parseFloat(h.totalGainLoss || "0");
+        const gainLossPercent = bookValue !== 0 ? (gainLoss / bookValue) * 100 : 0;
+        return {
+          symbol: h.symbol,
+          holding: h.holding,
+          gainLossPercent,
+          marketValue: parseFloat(h.totalMarketValue || "0"),
+        };
+      }),
       allocation: allocation.map((a) => ({
         category: a.category || "Unknown",
         value: parseFloat(a.totalValue) || 0,
