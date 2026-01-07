@@ -1,0 +1,312 @@
+@import "tailwindcss";
+
+/* Hacker Finance Theme Variables */
+:root {
+  /* Terminal colors */
+  --terminal-bg: #0a0a0f;
+  --terminal-bg-light: #121218;
+  --terminal-bg-card: #0f0f14;
+  --terminal-green: #00ff88;
+  --terminal-green-dim: #00cc6a;
+  --terminal-cyan: #00d4ff;
+  --terminal-magenta: #ff0080;
+  --terminal-yellow: #ffcc00;
+  --terminal-red: #ff3366;
+
+  /* Text colors */
+  --text-primary: #e0e0e0;
+  --text-secondary: #a0a0a0;
+  --text-muted: #6b7280;
+
+  /* Borders */
+  --border-color: rgba(0, 255, 136, 0.2);
+  --border-color-hover: rgba(0, 255, 136, 0.4);
+
+  /* Glows */
+  --glow-green: 0 0 20px rgba(0, 255, 136, 0.3);
+  --glow-cyan: 0 0 20px rgba(0, 212, 255, 0.3);
+  --glow-magenta: 0 0 20px rgba(255, 0, 128, 0.3);
+}
+
+@theme inline {
+  --color-terminal-bg: var(--terminal-bg);
+  --color-terminal-bg-light: var(--terminal-bg-light);
+  --color-terminal-bg-card: var(--terminal-bg-card);
+  --color-terminal-green: var(--terminal-green);
+  --color-terminal-green-dim: var(--terminal-green-dim);
+  --color-terminal-cyan: var(--terminal-cyan);
+  --color-terminal-magenta: var(--terminal-magenta);
+  --color-terminal-yellow: var(--terminal-yellow);
+  --color-terminal-red: var(--terminal-red);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --font-mono: "JetBrains Mono", "Fira Code", "SF Mono", Consolas, monospace;
+}
+
+/* Base styles */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--terminal-bg);
+  color: var(--text-primary);
+  font-family: "JetBrains Mono", "Fira Code", "SF Mono", Consolas, monospace;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--terminal-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--terminal-green-dim);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--terminal-green);
+}
+
+/* Terminal glow effect */
+.terminal-glow {
+  box-shadow: var(--glow-green),
+              inset 0 0 60px rgba(0, 255, 136, 0.03);
+  border: 1px solid var(--border-color);
+}
+
+.terminal-glow:hover {
+  border-color: var(--border-color-hover);
+}
+
+/* Scanline effect overlay */
+.scanlines::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    transparent 0px,
+    rgba(0, 0, 0, 0.05) 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Data row hover effect */
+.data-row {
+  transition: all 0.2s ease;
+}
+
+.data-row:hover {
+  background: rgba(0, 255, 136, 0.05);
+}
+
+/* Blinking cursor animation */
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.cursor-blink {
+  animation: blink 1s infinite;
+}
+
+/* Typing animation */
+@keyframes typing {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+.typing-effect {
+  overflow: hidden;
+  white-space: nowrap;
+  animation: typing 2s steps(40, end);
+}
+
+/* Glow pulse animation */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: var(--glow-green); }
+  50% { box-shadow: 0 0 30px rgba(0, 255, 136, 0.5); }
+}
+
+.glow-pulse {
+  animation: glow-pulse 2s infinite;
+}
+
+/* Number formatting */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Positive/negative value colors */
+.value-positive {
+  color: var(--terminal-green);
+}
+
+.value-negative {
+  color: var(--terminal-magenta);
+}
+
+.value-neutral {
+  color: var(--terminal-cyan);
+}
+
+/* Input styling */
+input, textarea, select {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--border-color);
+  color: var(--terminal-green);
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--terminal-green);
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--text-muted);
+}
+
+/* Button base styles */
+.btn-terminal {
+  background: rgba(0, 255, 136, 0.1);
+  border: 1px solid var(--terminal-green);
+  color: var(--terminal-green);
+  font-family: inherit;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-terminal:hover {
+  background: rgba(0, 255, 136, 0.2);
+  box-shadow: var(--glow-green);
+}
+
+.btn-terminal:active {
+  transform: scale(0.98);
+}
+
+.btn-terminal:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Terminal window frame */
+.terminal-window {
+  background: var(--terminal-bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.terminal-header {
+  background: var(--terminal-bg-light);
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.terminal-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.terminal-dot-red { background: #ff5f56; }
+.terminal-dot-yellow { background: #ffbd2e; }
+.terminal-dot-green { background: #27ca40; }
+
+/* Table styles */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  color: var(--terminal-cyan);
+  font-weight: 500;
+  border-bottom: 1px solid var(--border-color);
+  white-space: nowrap;
+}
+
+.data-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(0, 255, 136, 0.1);
+}
+
+.data-table tr:hover td {
+  background: rgba(0, 255, 136, 0.05);
+}
+
+/* Card styles */
+.stat-card {
+  background: var(--terminal-bg-card);
+  border: 1px solid var(--border-color);
+  padding: 1.5rem;
+  transition: all 0.2s ease;
+}
+
+.stat-card:hover {
+  border-color: var(--border-color-hover);
+  box-shadow: var(--glow-green);
+}
+
+/* Chart container */
+.chart-container {
+  background: var(--terminal-bg-card);
+  border: 1px solid var(--border-color);
+  padding: 1.5rem;
+}
+
+/* Loading spinner */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--terminal-bg-light);
+  border-top-color: var(--terminal-green);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* Dropdown menu */
+.dropdown-menu {
+  background: var(--terminal-bg-card);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.dropdown-item {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.dropdown-item:hover {
+  background: rgba(0, 255, 136, 0.1);
+}
