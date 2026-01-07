@@ -18,7 +18,7 @@ async function DashboardContent() {
   // Get latest snapshot
   const latestSnapshot = await db.query.snapshots.findFirst({
     where: eq(snapshots.userId, session.user.id),
-    orderBy: [desc(snapshots.importedAt)],
+    orderBy: [desc(snapshots.snapshotDate)],
   });
 
   if (!latestSnapshot) {
@@ -57,7 +57,7 @@ async function DashboardContent() {
             <span className="text-terminal-cyan">$</span> portfolio_status
           </h1>
           <p className="text-text-muted text-sm mt-1">
-            Last updated: {latestSnapshot.importedAt?.toLocaleDateString()}
+            Snapshot: {latestSnapshot.snapshotDate?.toLocaleDateString()}
           </p>
         </div>
         <Link

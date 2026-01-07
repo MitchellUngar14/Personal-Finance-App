@@ -15,7 +15,7 @@ export async function GET() {
     const userSnapshots = await db
       .select({
         id: snapshots.id,
-        importedAt: snapshots.importedAt,
+        snapshotDate: snapshots.snapshotDate,
         filename: snapshots.filename,
         recordCount: snapshots.recordCount,
         totalMarketValue: portfolioMetrics.totalMarketValue,
@@ -25,7 +25,7 @@ export async function GET() {
       .from(snapshots)
       .leftJoin(portfolioMetrics, eq(snapshots.id, portfolioMetrics.snapshotId))
       .where(eq(snapshots.userId, user.id))
-      .orderBy(desc(snapshots.importedAt));
+      .orderBy(desc(snapshots.snapshotDate));
 
     return NextResponse.json({ snapshots: userSnapshots });
   } catch (error) {

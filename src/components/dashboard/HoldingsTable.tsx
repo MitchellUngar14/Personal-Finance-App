@@ -7,7 +7,6 @@ interface Holding {
   id: number;
   clientName: string | null;
   accountNickname: string | null;
-  accountNumber: string | null;
   assetCategory: string | null;
   industry: string | null;
   symbol: string | null;

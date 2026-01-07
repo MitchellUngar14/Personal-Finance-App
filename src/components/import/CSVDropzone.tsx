@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatDate } from "@/lib/utils";
 
 interface ImportResult {
   success: boolean;
@@ -10,6 +10,7 @@ interface ImportResult {
     id: number;
     filename: string;
     recordCount: number;
+    snapshotDate: string;
     importedAt: string;
   };
   metrics: {
@@ -22,10 +23,17 @@ interface ImportResult {
   };
 }
 
+// Get today's date in YYYY-MM-DD format for the date input
+function getTodayString(): string {
+  const today = new Date();
+  return today.toISOString().split("T")[0];
+}
+
 export function CSVDropzone() {
   const router = useRouter();
   const [isDragging, setIsDragging] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [snapshotDate, setSnapshotDate] = useState(getTodayString());
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ImportResult | null>(null);
@@ -48,7 +56,7 @@ export function CSVDropzone() {
     setResult(null);
 
     const droppedFile = e.dataTransfer.files[0];
-    if (droppedFile && droppedFile.type === "text/csv") {
+    if (droppedFile && (droppedFile.type === "text/csv" || droppedFile.name.endsWith(".csv"))) {
       setFile(droppedFile);
     } else {
       setError("Please drop a CSV file");
@@ -80,6 +88,7 @@ export function CSVDropzone() {
     try {
       const formData = new FormData();
       formData.append("file", file);
+      formData.append("snapshotDate", snapshotDate);
 
       const response = await fetch("/api/imports", {
         method: "POST",
@@ -108,6 +117,7 @@ export function CSVDropzone() {
     setError(null);
     setResult(null);
     setUploadProgress(0);
+    setSnapshotDate(getTodayString());
   };
 
   if (result) {
@@ -116,7 +126,7 @@ export function CSVDropzone() {
         <div className="text-center">
           <div className="text-terminal-green text-4xl mb-4">[SUCCESS]</div>
           <p className="text-text-muted">
-            Import completed successfully
+            Import completed for {formatDate(result.snapshot.snapshotDate)}
           </p>
         </div>
 
@@ -167,6 +177,25 @@ export function CSVDropzone() {
 
   return (
     <div className="space-y-6">
+      {/* Snapshot Date Picker */}
+      <div className="flex items-center gap-4">
+        <label className="text-terminal-green text-sm">
+          SNAPSHOT DATE<span className="cursor-blink">_</span>
+        </label>
+        <input
+          type="date"
+          value={snapshotDate}
+          onChange={(e) => setSnapshotDate(e.target.value)}
+          max={getTodayString()}
+          className="bg-black/50 border border-terminal-green/30 text-terminal-green
+                     px-3 py-2 focus:border-terminal-green focus:outline-none
+                     [color-scheme:dark]"
+        />
+        <span className="text-text-muted text-xs">
+          (When was this data captured?)
+        </span>
+      </div>
+
       {/* Dropzone */}
       <div
         onDragOver={handleDragOver}
@@ -253,9 +282,12 @@ export function CSVDropzone() {
       <div className="text-text-muted text-sm space-y-2">
         <p className="text-terminal-cyan">Expected CSV columns:</p>
         <p className="text-xs leading-relaxed">
-          Client Name, Client Id, Account Nickname, Account Number, Asset Category,
-          Industry, Symbol, Holding, Quantity, Price, Fund, Average Cost, Book Value,
-          Market Value, Accrued Interest, G/L, G/L (%), Percentage of Assets
+          Client Name, Account Nickname, Asset Category, Industry, Symbol, Holding,
+          Quantity, Price, Fund, Average Cost, Book Value, Market Value, Accrued Interest,
+          G/L, G/L (%), Percentage of Assets
+        </p>
+        <p className="text-xs text-terminal-yellow mt-2">
+          Note: Client Id and Account Number columns are read but NOT stored for security.
         </p>
       </div>
     </div>

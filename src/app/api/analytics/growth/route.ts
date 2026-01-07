@@ -12,11 +12,11 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get all snapshots with metrics, ordered by date
+    // Get all snapshots with metrics, ordered by snapshot date
     const growthData = await db
       .select({
         id: snapshots.id,
-        importedAt: snapshots.importedAt,
+        snapshotDate: snapshots.snapshotDate,
         filename: snapshots.filename,
         totalMarketValue: portfolioMetrics.totalMarketValue,
         totalBookValue: portfolioMetrics.totalBookValue,
@@ -27,7 +27,7 @@ export async function GET() {
       .from(snapshots)
       .innerJoin(portfolioMetrics, eq(snapshots.id, portfolioMetrics.snapshotId))
       .where(eq(snapshots.userId, user.id))
-      .orderBy(snapshots.importedAt);
+      .orderBy(snapshots.snapshotDate);
 
     // Calculate period-over-period changes
     const dataPoints = growthData.map((point, index) => {
@@ -38,7 +38,7 @@ export async function GET() {
       const periodChangePercent = prevValue > 0 ? (periodChange / prevValue) * 100 : 0;
 
       return {
-        date: point.importedAt,
+        date: point.snapshotDate,
         totalValue: currentValue,
         bookValue: parseFloat(point.totalBookValue || "0"),
         gainLoss: parseFloat(point.totalGainLoss || "0"),

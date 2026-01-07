@@ -15,9 +15,23 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
+    const snapshotDateStr = formData.get("snapshotDate") as string | null;
 
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
+    }
+
+    // Parse snapshot date (defaults to current date if not provided)
+    const snapshotDate = snapshotDateStr
+      ? new Date(snapshotDateStr)
+      : new Date();
+
+    // Validate the date
+    if (isNaN(snapshotDate.getTime())) {
+      return NextResponse.json(
+        { error: "Invalid snapshot date" },
+        { status: 400 }
+      );
     }
 
     // Read file content
@@ -72,25 +86,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create snapshot
+    // Create snapshot with user-specified date
     const [snapshot] = await db
       .insert(snapshots)
       .values({
         userId: user.id,
+        snapshotDate: snapshotDate, // User-selected date for the data
         filename: file.name,
         recordCount: rows.length,
       })
       .returning();
 
     // Transform and insert holdings
+    // Note: Client Id and Account Number are intentionally NOT stored for security
     const holdingsData = rows.map((row) => {
       const transformed = transformCsvRow(row);
       return {
         snapshotId: snapshot.id,
         clientName: transformed.clientName,
-        clientId: transformed.clientId,
         accountNickname: transformed.accountNickname,
-        accountNumber: transformed.accountNumber,
         assetCategory: transformed.assetCategory,
         industry: transformed.industry,
         symbol: transformed.symbol,
@@ -151,6 +165,7 @@ export async function POST(request: NextRequest) {
         id: snapshot.id,
         filename: snapshot.filename,
         recordCount: snapshot.recordCount,
+        snapshotDate: snapshot.snapshotDate,
         importedAt: snapshot.importedAt,
       },
       metrics: {

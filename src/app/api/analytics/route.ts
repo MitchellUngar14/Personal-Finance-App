@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     } else {
       targetSnapshot = await db.query.snapshots.findFirst({
         where: eq(snapshots.userId, user.id),
-        orderBy: [desc(snapshots.importedAt)],
+        orderBy: [desc(snapshots.snapshotDate)],
       });
     }
 
@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       snapshot: {
         id: targetSnapshot.id,
-        importedAt: targetSnapshot.importedAt,
+        snapshotDate: targetSnapshot.snapshotDate,
         filename: targetSnapshot.filename,
       },
       summary: metrics

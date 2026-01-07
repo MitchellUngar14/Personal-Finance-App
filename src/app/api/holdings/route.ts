@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     } else {
       targetSnapshot = await db.query.snapshots.findFirst({
         where: eq(snapshots.userId, user.id),
-        orderBy: [desc(snapshots.importedAt)],
+        orderBy: [desc(snapshots.snapshotDate)],
       });
     }
 
@@ -79,7 +79,6 @@ export async function GET(request: NextRequest) {
         id: h.id,
         clientName: h.clientName,
         accountNickname: h.accountNickname,
-        accountNumber: h.accountNumber,
         assetCategory: h.assetCategory,
         industry: h.industry,
         symbol: h.symbol,
@@ -100,7 +99,7 @@ export async function GET(request: NextRequest) {
       },
       snapshot: {
         id: targetSnapshot.id,
-        importedAt: targetSnapshot.importedAt,
+        snapshotDate: targetSnapshot.snapshotDate,
       },
     });
   } catch (error) {

@@ -7,7 +7,7 @@ import Link from "next/link";
 
 interface Snapshot {
   id: number;
-  importedAt: string;
+  snapshotDate: string;
   filename: string;
   recordCount: number;
   totalMarketValue: string | null;
@@ -162,7 +162,7 @@ export default function HistoryPage() {
                           #{snapshot.id}
                         </span>
                         <span className="text-terminal-green">
-                          {formatDateTime(snapshot.importedAt)}
+                          {formatDateTime(snapshot.snapshotDate)}
                         </span>
                         {index === 0 && (
                           <span className="text-xs bg-terminal-green/20 text-terminal-green px-2 py-0.5 rounded">

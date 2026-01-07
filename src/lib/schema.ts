@@ -37,21 +37,21 @@ export const snapshots = pgTable("snapshots", {
   userId: uuid("user_id")
     .references(() => users.id, { onDelete: "cascade" })
     .notNull(),
-  importedAt: timestamp("imported_at", { withTimezone: true }).defaultNow(),
+  snapshotDate: timestamp("snapshot_date", { withTimezone: true }).notNull(), // When the data was captured
+  importedAt: timestamp("imported_at", { withTimezone: true }).defaultNow(), // When the import occurred
   filename: varchar("filename", { length: 255 }),
   recordCount: integer("record_count"),
 });
 
 // Holdings data from CSV imports
+// Note: Client Id and Account Number are intentionally NOT stored for security
 export const holdings = pgTable("holdings", {
   id: serial("id").primaryKey(),
   snapshotId: integer("snapshot_id")
     .references(() => snapshots.id, { onDelete: "cascade" })
     .notNull(),
   clientName: varchar("client_name", { length: 255 }),
-  clientId: varchar("client_id", { length: 100 }),
-  accountNickname: varchar("account_nickname", { length: 255 }),
-  accountNumber: varchar("account_number", { length: 100 }),
+  accountNickname: varchar("account_nickname", { length: 255 }), // e.g., "Investment Account - TFSA"
   assetCategory: varchar("asset_category", { length: 100 }),
   industry: varchar("industry", { length: 100 }),
   symbol: varchar("symbol", { length: 50 }),

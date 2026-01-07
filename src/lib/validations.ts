@@ -45,11 +45,10 @@ export const csvRowSchema = z.object({
 });
 
 // Parsed holding data after cleaning
+// Note: Client Id and Account Number are intentionally excluded for security
 export const holdingSchema = z.object({
   clientName: z.string().nullable(),
-  clientId: z.string().nullable(),
-  accountNickname: z.string().nullable(),
-  accountNumber: z.string().nullable(),
+  accountNickname: z.string().nullable(), // e.g., "Investment Account - TFSA"
   assetCategory: z.string().nullable(),
   industry: z.string().nullable(),
   symbol: z.string().nullable(),
@@ -90,12 +89,11 @@ export function parsePercent(value: string | undefined | null): number | null {
 }
 
 // Transform CSV row to holding data
+// Note: Client Id and Account Number are read but NOT stored for security
 export function transformCsvRow(row: CSVRow): HoldingInput {
   return {
     clientName: row["Client Name"] || null,
-    clientId: row["Client Id"] || null,
-    accountNickname: row["Account Nickname"] || null,
-    accountNumber: row["Account Number"] || null,
+    accountNickname: row["Account Nickname"] || null, // Used for grouping (e.g., "Investment Account - TFSA")
     assetCategory: row["Asset Category"] || null,
     industry: row["Industry"] || null,
     symbol: row["Symbol"] || null,
