@@ -79,8 +79,8 @@ temp/
 *.tmp
 *.temp
 
-# PWA generated files
-public/sw.js
-public/sw.js.map
-public/workbox-*.js
-public/workbox-*.js.map
+# PWA generated files (keep these for Vercel deployment)
+# public/sw.js
+# public/sw.js.map
+# public/workbox-*.js
+# public/workbox-*.js.map
