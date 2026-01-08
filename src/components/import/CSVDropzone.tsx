@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import type { PortfolioSource } from "@/lib/validations";
 
 interface ImportResult {
   success: boolean;
@@ -12,6 +13,7 @@ interface ImportResult {
     recordCount: number;
     snapshotDate: string;
     importedAt: string;
+    source: PortfolioSource;
   };
   metrics: {
     totalMarketValue: number;
@@ -34,6 +36,7 @@ export function CSVDropzone() {
   const [isDragging, setIsDragging] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [snapshotDate, setSnapshotDate] = useState(getTodayString());
+  const [source, setSource] = useState<PortfolioSource>("raymond_james");
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ImportResult | null>(null);
@@ -89,6 +92,7 @@ export function CSVDropzone() {
       const formData = new FormData();
       formData.append("file", file);
       formData.append("snapshotDate", snapshotDate);
+      formData.append("source", source);
 
       const response = await fetch("/api/imports", {
         method: "POST",
@@ -118,6 +122,11 @@ export function CSVDropzone() {
     setResult(null);
     setUploadProgress(0);
     setSnapshotDate(getTodayString());
+    setSource("raymond_james");
+  };
+
+  const getSourceLabel = (src: PortfolioSource) => {
+    return src === "raymond_james" ? "Raymond James" : "Wealthsimple";
   };
 
   if (result) {
@@ -126,7 +135,7 @@ export function CSVDropzone() {
         <div className="text-center">
           <div className="text-terminal-green text-4xl mb-4">[SUCCESS]</div>
           <p className="text-text-muted">
-            Import completed for {formatDate(result.snapshot.snapshotDate)}
+            {getSourceLabel(result.snapshot.source)} import completed for {formatDate(result.snapshot.snapshotDate)}
           </p>
         </div>
 
@@ -177,23 +186,42 @@ export function CSVDropzone() {
 
   return (
     <div className="space-y-6">
+      {/* Source Selection */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+        <label className="text-terminal-green text-sm">
+          SOURCE<span className="cursor-blink">_</span>
+        </label>
+        <select
+          value={source}
+          onChange={(e) => setSource(e.target.value as PortfolioSource)}
+          className="bg-black/50 border border-terminal-green/30 text-terminal-green
+                     px-3 py-2 focus:border-terminal-green focus:outline-none
+                     [color-scheme:dark] cursor-pointer"
+        >
+          <option value="raymond_james">Raymond James</option>
+          <option value="wealthsimple">Wealthsimple</option>
+        </select>
+      </div>
+
       {/* Snapshot Date Picker */}
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
         <label className="text-terminal-green text-sm">
           SNAPSHOT DATE<span className="cursor-blink">_</span>
         </label>
-        <input
-          type="date"
-          value={snapshotDate}
-          onChange={(e) => setSnapshotDate(e.target.value)}
-          max={getTodayString()}
-          className="bg-black/50 border border-terminal-green/30 text-terminal-green
-                     px-3 py-2 focus:border-terminal-green focus:outline-none
-                     [color-scheme:dark]"
-        />
-        <span className="text-text-muted text-xs">
-          (When was this data captured?)
-        </span>
+        <div className="flex items-center gap-2">
+          <input
+            type="date"
+            value={snapshotDate}
+            onChange={(e) => setSnapshotDate(e.target.value)}
+            max={getTodayString()}
+            className="bg-black/50 border border-terminal-green/30 text-terminal-green
+                       px-3 py-2 focus:border-terminal-green focus:outline-none
+                       [color-scheme:dark]"
+          />
+          <span className="text-text-muted text-xs hidden sm:inline">
+            (When was this data captured?)
+          </span>
+        </div>
       </div>
 
       {/* Dropzone */}
@@ -230,7 +258,7 @@ export function CSVDropzone() {
               [DROP CSV]
             </div>
             <p className="text-text-muted mb-4">
-              Drag and drop your Raymond James export here
+              Drag and drop your {getSourceLabel(source)} export here
             </p>
             <label className="btn-terminal cursor-pointer inline-block">
               [SELECT FILE]
@@ -278,18 +306,46 @@ export function CSVDropzone() {
         </button>
       )}
 
-      {/* Help Text */}
-      <div className="text-text-muted text-sm space-y-2">
-        <p className="text-terminal-cyan">Expected CSV columns:</p>
-        <p className="text-xs leading-relaxed">
-          Client Name, Account Nickname, Asset Category, Industry, Symbol, Holding,
-          Quantity, Price, Fund, Average Cost, Book Value, Market Value, Accrued Interest,
-          G/L, G/L (%), Percentage of Assets
-        </p>
-        <p className="text-xs text-terminal-yellow mt-2">
-          Note: Client Id and Account Number columns are read but NOT stored for security.
-        </p>
-      </div>
+      {/* Help Text - Conditional based on source */}
+      {source === "raymond_james" ? (
+        <div className="text-text-muted text-sm space-y-2">
+          <p className="text-terminal-cyan">Expected CSV columns:</p>
+          <p className="text-xs leading-relaxed">
+            Client Name, Account Nickname, Asset Category, Industry, Symbol, Holding,
+            Quantity, Price, Fund, Average Cost, Book Value, Market Value, Accrued Interest,
+            G/L, G/L (%), Percentage of Assets
+          </p>
+          <p className="text-xs text-terminal-yellow mt-2">
+            Note: Client Id and Account Number columns are read but NOT stored for security.
+          </p>
+        </div>
+      ) : (
+        <div className="text-text-muted text-sm space-y-3">
+          <div>
+            <p className="text-terminal-cyan mb-2">How to export from Wealthsimple:</p>
+            <ol className="text-xs leading-relaxed list-decimal list-inside space-y-1">
+              <li>Sign in to Wealthsimple</li>
+              <li>Click your user icon in the top right</li>
+              <li>Select &quot;Documents&quot;</li>
+              <li>Select &quot;Request Documents&quot;</li>
+              <li>Choose &quot;Holdings report (CSV)&quot;</li>
+              <li>Click Next</li>
+              <li>Select your Stock Portfolio account</li>
+              <li>Export and download the CSV</li>
+            </ol>
+          </div>
+          <div>
+            <p className="text-terminal-cyan">Expected CSV columns:</p>
+            <p className="text-xs leading-relaxed">
+              Account Name, Account Type, Symbol, Name, Security Type, Quantity,
+              Market Price, Book Value (CAD), Market Value, Market Unrealized Returns
+            </p>
+          </div>
+          <p className="text-xs text-terminal-yellow">
+            Note: Account Number column is read but NOT stored for security.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

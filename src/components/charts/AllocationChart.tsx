@@ -49,15 +49,15 @@ export function AllocationChart({ data }: AllocationChartProps) {
   }));
 
   return (
-    <div className={isMobile ? "h-[550px] w-full" : "h-[400px] w-full"}>
+    <div className={isMobile ? "h-[400px] w-full" : "h-[400px] w-full"}>
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
             data={chartData}
             cx="50%"
-            cy={isMobile ? "40%" : "50%"}
-            innerRadius={isMobile ? 100 : 80}
-            outerRadius={isMobile ? 180 : 140}
+            cy={isMobile ? "35%" : "50%"}
+            innerRadius={isMobile ? 50 : 80}
+            outerRadius={isMobile ? 100 : 140}
             paddingAngle={2}
             dataKey="value"
             nameKey="category"
@@ -81,7 +81,15 @@ export function AllocationChart({ data }: AllocationChartProps) {
               border: "1px solid rgba(0, 255, 136, 0.3)",
               borderRadius: "4px",
               color: "#e0e0e0",
+              maxWidth: isMobile ? "180px" : "300px",
+              whiteSpace: "normal",
+              wordBreak: "break-word",
             }}
+            wrapperStyle={{
+              zIndex: 100,
+              ...(isMobile && { left: "10px", right: "auto" }),
+            }}
+            position={isMobile ? { x: 10, y: 200 } : undefined}
             labelStyle={{ color: "#00d4ff", fontWeight: "bold", marginBottom: "4px" }}
             itemStyle={{ color: "#00ff88" }}
             formatter={(value, name, props) => {

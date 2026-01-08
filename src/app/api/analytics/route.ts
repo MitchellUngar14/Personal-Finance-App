@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { desc, eq, sql, asc } from "drizzle-orm";
+import { desc, eq, sql, asc, and } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { snapshots, holdings, portfolioMetrics } from "@/lib/schema";
 import { getCurrentUser } from "@/lib/auth";
+import type { PortfolioSource } from "@/lib/validations";
 
 // GET /api/analytics - Get portfolio analytics (latest or specified snapshot)
 export async function GET(request: NextRequest) {
@@ -14,14 +15,22 @@ export async function GET(request: NextRequest) {
 
     const searchParams = request.nextUrl.searchParams;
     const snapshotId = searchParams.get("snapshotId");
+    const source = searchParams.get("source") as PortfolioSource | null;
 
-    // Get the target snapshot (latest if not specified)
+    // Get the target snapshot (latest if not specified, optionally filtered by source)
     let targetSnapshot;
     if (snapshotId && snapshotId !== "latest") {
       targetSnapshot = await db.query.snapshots.findFirst({
         where: eq(snapshots.id, parseInt(snapshotId)),
       });
+    } else if (source) {
+      // Get latest snapshot for specified source
+      targetSnapshot = await db.query.snapshots.findFirst({
+        where: and(eq(snapshots.userId, user.id), eq(snapshots.source, source)),
+        orderBy: [desc(snapshots.snapshotDate)],
+      });
     } else {
+      // Get latest snapshot regardless of source (backwards compatible)
       targetSnapshot = await db.query.snapshots.findFirst({
         where: eq(snapshots.userId, user.id),
         orderBy: [desc(snapshots.snapshotDate)],
@@ -88,6 +97,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       snapshot: {
         id: targetSnapshot.id,
+        source: targetSnapshot.source,
         snapshotDate: targetSnapshot.snapshotDate,
         filename: targetSnapshot.filename,
       },

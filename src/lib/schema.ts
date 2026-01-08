@@ -31,12 +31,16 @@ export const sessions = pgTable("sessions", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 
+// Portfolio source types
+export type PortfolioSource = "raymond_james" | "wealthsimple";
+
 // Import snapshots - each CSV import creates a snapshot
 export const snapshots = pgTable("snapshots", {
   id: serial("id").primaryKey(),
   userId: uuid("user_id")
     .references(() => users.id, { onDelete: "cascade" })
     .notNull(),
+  source: varchar("source", { length: 50 }).notNull().default("raymond_james"), // 'raymond_james' or 'wealthsimple'
   snapshotDate: timestamp("snapshot_date", { withTimezone: true }).notNull(), // When the data was captured
   importedAt: timestamp("imported_at", { withTimezone: true }).defaultNow(), // When the import occurred
   filename: varchar("filename", { length: 255 }),

@@ -332,47 +332,49 @@ export default function AccountsPage() {
                 {bankAccounts.map((account) => (
                   <div
                     key={account.id}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-terminal-bg/50 border border-terminal-green/10 hover:border-terminal-green/30 transition-colors"
+                    className="p-3 bg-terminal-bg/50 border border-terminal-green/10 hover:border-terminal-green/30 transition-colors"
                   >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-text-primary">{account.accountName}</span>
-                        {account.accountType && (
-                          <span className="text-xs text-terminal-cyan border border-terminal-cyan/30 px-1.5 py-0.5">
-                            {account.accountType}
-                          </span>
-                        )}
+                    {/* Mobile Layout */}
+                    <div className="sm:hidden space-y-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-text-primary">{account.accountName}</span>
+                            {account.accountType && (
+                              <span className="text-xs text-terminal-cyan border border-terminal-cyan/30 px-1.5 py-0.5">
+                                {account.accountType}
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-xs text-text-muted mt-0.5">
+                            {account.latestRecordedAt
+                              ? `Updated: ${new Date(account.latestRecordedAt).toLocaleDateString()}`
+                              : "No value"}
+                          </div>
+                        </div>
+                        <span className={`text-base tabular-nums font-bold flex-shrink-0 ${
+                          debtTypes.includes(account.accountType || "") ? "text-terminal-magenta" : "text-terminal-green"
+                        }`}>
+                          {account.latestValue !== null ? (
+                            debtTypes.includes(account.accountType || "")
+                              ? `-${formatCurrency(Math.abs(account.latestValue))}`
+                              : formatCurrency(account.latestValue)
+                          ) : "—"}
+                        </span>
                       </div>
-                      <div className="text-xs text-text-muted mt-0.5">
-                        {account.latestRecordedAt
-                          ? `Last updated: ${new Date(account.latestRecordedAt).toLocaleDateString()}`
-                          : "No value recorded"}
-                        {account.entryCount > 0 && ` • ${account.entryCount} entries`}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className={`text-lg tabular-nums font-bold ${
-                        debtTypes.includes(account.accountType || "") ? "text-terminal-magenta" : "text-terminal-green"
-                      }`}>
-                        {account.latestValue !== null ? (
-                          debtTypes.includes(account.accountType || "")
-                            ? `-${formatCurrency(Math.abs(account.latestValue))}`
-                            : formatCurrency(account.latestValue)
-                        ) : "—"}
-                      </span>
                       <div className="flex gap-1">
                         <button
                           onClick={() => {
                             setSelectedAccount(account);
                             setUpdateValue(account.latestValue?.toString() || "");
                           }}
-                          className="text-terminal-cyan hover:bg-terminal-cyan/10 px-2 py-1 text-xs border border-terminal-cyan/30 transition-colors"
+                          className="text-terminal-cyan hover:bg-terminal-cyan/10 px-2 py-1 text-xs border border-terminal-cyan/30 transition-colors flex-1"
                         >
                           UPDATE
                         </button>
                         <button
                           onClick={() => handleViewHistory(account)}
-                          className="text-terminal-yellow hover:bg-terminal-yellow/10 px-2 py-1 text-xs border border-terminal-yellow/30 transition-colors"
+                          className="text-terminal-yellow hover:bg-terminal-yellow/10 px-2 py-1 text-xs border border-terminal-yellow/30 transition-colors flex-1"
                         >
                           HISTORY
                         </button>
@@ -382,6 +384,60 @@ export default function AccountsPage() {
                         >
                           ×
                         </button>
+                      </div>
+                    </div>
+
+                    {/* Desktop Layout */}
+                    <div className="hidden sm:flex items-center justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-text-primary">{account.accountName}</span>
+                          {account.accountType && (
+                            <span className="text-xs text-terminal-cyan border border-terminal-cyan/30 px-1.5 py-0.5">
+                              {account.accountType}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs text-text-muted mt-0.5">
+                          {account.latestRecordedAt
+                            ? `Last updated: ${new Date(account.latestRecordedAt).toLocaleDateString()}`
+                            : "No value recorded"}
+                          {account.entryCount > 0 && ` • ${account.entryCount} entries`}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 flex-shrink-0">
+                        <span className={`text-lg tabular-nums font-bold ${
+                          debtTypes.includes(account.accountType || "") ? "text-terminal-magenta" : "text-terminal-green"
+                        }`}>
+                          {account.latestValue !== null ? (
+                            debtTypes.includes(account.accountType || "")
+                              ? `-${formatCurrency(Math.abs(account.latestValue))}`
+                              : formatCurrency(account.latestValue)
+                          ) : "—"}
+                        </span>
+                        <div className="flex gap-1">
+                          <button
+                            onClick={() => {
+                              setSelectedAccount(account);
+                              setUpdateValue(account.latestValue?.toString() || "");
+                            }}
+                            className="text-terminal-cyan hover:bg-terminal-cyan/10 px-2 py-1 text-xs border border-terminal-cyan/30 transition-colors"
+                          >
+                            UPDATE
+                          </button>
+                          <button
+                            onClick={() => handleViewHistory(account)}
+                            className="text-terminal-yellow hover:bg-terminal-yellow/10 px-2 py-1 text-xs border border-terminal-yellow/30 transition-colors"
+                          >
+                            HISTORY
+                          </button>
+                          <button
+                            onClick={() => handleDeleteAccount(account.id)}
+                            className="text-terminal-magenta hover:bg-terminal-magenta/10 px-2 py-1 text-xs border border-terminal-magenta/30 transition-colors"
+                          >
+                            ×
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>

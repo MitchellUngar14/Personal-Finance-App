@@ -15,6 +15,7 @@ export async function GET() {
     const userSnapshots = await db
       .select({
         id: snapshots.id,
+        source: snapshots.source,
         snapshotDate: snapshots.snapshotDate,
         filename: snapshots.filename,
         recordCount: snapshots.recordCount,

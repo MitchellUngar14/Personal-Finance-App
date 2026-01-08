@@ -8,19 +8,30 @@ import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const navItems = [
-  { href: "/", label: "Dashboard", icon: ">" },
-  { href: "/import", label: "Import", icon: "+" },
+interface NavItem {
+  href: string;
+  label: string;
+  icon: string;
+  requiresRJ?: boolean;
+  requiresImports?: boolean;
+}
+
+const navItems: NavItem[] = [
+  { href: "/", label: "Overview", icon: "~" },
+  { href: "/portfolio", label: "Portfolio", icon: ">", requiresImports: true },
   { href: "/accounts", label: "Accounts", icon: "$" },
   { href: "/charts", label: "Charts", icon: "#" },
-  { href: "/history", label: "History", icon: "@" },
+  { href: "/import", label: "Import", icon: "+" },
+  { href: "/history", label: "History", icon: "@", requiresImports: true },
 ];
 
 export function Navbar() {
   const pathname = usePathname();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [hasRJData, setHasRJData] = useState(false);
+  const [hasAnyImports, setHasAnyImports] = useState(false);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const closeMenu = () => setIsMenuOpen(false);
@@ -30,10 +41,34 @@ export function Navbar() {
     setMounted(true);
   }, []);
 
+  // Check if user has data (refresh on route change to catch new imports)
+  useEffect(() => {
+    if (status === "authenticated") {
+      fetch("/api/snapshots")
+        .then((res) => res.json())
+        .then((data) => {
+          const snapshots = data.snapshots || [];
+          setHasAnyImports(snapshots.length > 0);
+          setHasRJData(snapshots.some((s: { source: string }) => s.source === "raymond_james"));
+        })
+        .catch(() => {
+          setHasRJData(false);
+          setHasAnyImports(false);
+        });
+    }
+  }, [status, pathname]);
+
   // Close menu when route changes
   useEffect(() => {
     closeMenu();
   }, [pathname]);
+
+  // Filter nav items based on data availability
+  const visibleNavItems = navItems.filter((item) => {
+    if (item.requiresRJ && !hasRJData) return false;
+    if (item.requiresImports && !hasAnyImports) return false;
+    return true;
+  });
 
   return (
     <>
@@ -61,7 +96,7 @@ export function Navbar() {
 
           {/* Desktop Navigation Links */}
           <div className="hidden md:flex items-center gap-1">
-            {navItems.map((item) => {
+            {visibleNavItems.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link
@@ -167,7 +202,7 @@ export function Navbar() {
 
                 {/* Mobile Navigation Links */}
                 <div className="p-5 space-y-3 flex-grow overflow-y-auto">
-                  {navItems.map((item, index) => {
+                  {visibleNavItems.map((item, index) => {
                     const isActive = pathname === item.href;
                     return (
                       <motion.div

@@ -9,7 +9,7 @@ export default function ImportPage() {
           <span className="text-terminal-cyan">$</span> import_csv
         </h1>
         <p className="text-text-muted text-sm mt-1">
-          Upload your Raymond James portfolio export
+          Import portfolio data from Raymond James or Wealthsimple
         </p>
       </div>
 
